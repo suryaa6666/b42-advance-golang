@@ -1,39 +1,40 @@
 ### Table of Contents
 
-- [GORM Relation Has Many](#gorm-relation-has-many)
+- [GORM Relation Many to Many](#gorm-relation-has-many)
   - [Repository](#repository)
 
 ---
 
-# GORM Relation Has Many
+# GORM Relation Many to Many
 
-Reference: [Official GORM Website](https://gorm.io/docs/has_many.html)
+Reference: [Official GORM Website](https://gorm.io/docs/many_to_many.html)
 
 ## Relation
 
-For this section, example Has Many relation:
+For this section, example Many to Many relation:
 
-- `User` &rarr; `Product`: to get User Product
+- `Product` &rarr; `Category`: to get Product Category
 
 ## Repository
 
-- Inside `repositories` folder, in `users.go` file write this below code
+- Inside `repositories` folder, in `product.go` file write this below code
 
-  > File: `repositories/users.go`
+  > File: `repositories/product.go`
 
   ```go
-  func (r *repository) FindUsers() ([]models.User, error) {
-    var users []models.User
-    err := r.db.Preload("Profile").Preload("Products").Find(&users).Error // add this code
+  func (r *repository) FindProducts() ([]models.Product, error) {
+    var products []models.Product
+    err := r.db.Preload("User").Preload("Category").Find(&products).Error // add this code
 
-    return users, err
+    return products, err
   }
 
-  func (r *repository) GetUser(ID int) (models.User, error) {
-    var user models.User
-    err := r.db.Preload("Profile").Preload("Products").First(&user, ID).Error // add this code
+  func (r *repository) GetProduct(ID int) (models.Product, error) {
+    var product models.Product
+    // not yet using category relation, cause this step doesnt Belong to Many
+    err := r.db.Preload("User").Preload("Category").First(&product, ID).Error // add this code
 
-    return user, err
+    return product, err
   }
   ```
 
