@@ -85,6 +85,7 @@ func (h *handlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		UserID: request.UserID,
 	}
 
+	// err := mysql.DB.Create(&product).Error
 	product, err = h.ProductRepository.CreateProduct(product)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
