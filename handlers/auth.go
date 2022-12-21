@@ -1,6 +1,5 @@
 package handlers
 
-// Dont forget import required packages this below ...
 import (
 	authdto "dumbmerch/dto/auth"
 	dto "dumbmerch/dto/result"
@@ -71,7 +70,6 @@ func (h *handlerAuth) Register(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-// Create Login method here ...
 func (h *handlerAuth) Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -88,8 +86,9 @@ func (h *handlerAuth) Login(w http.ResponseWriter, r *http.Request) {
 		Password: request.Password,
 	}
 
+	// Check email
+	// err := mysql.DB.First(&user, "email = ?", user.Email).Error
 	user, err := h.AuthRepository.Login(user.Email)
-	// misal email gak ada
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
@@ -97,35 +96,37 @@ func (h *handlerAuth) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// check password
+	// Check password
 	isValid := bcrypt.CheckPasswordHash(request.Password, user.Password)
 	if !isValid {
 		w.WriteHeader(http.StatusBadRequest)
-		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: "salah email atau password"}
+		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: "wrong email or password"}
+		// response := Result{Code: http.StatusBadRequest, Message: "wrong email or password"}
 		json.NewEncoder(w).Encode(response)
 		return
 	}
 
+	//generate token
 	claims := jwt.MapClaims{}
 	claims["id"] = user.ID
-	claims["email"] = user.Email
-	claims["password"] = user.Password
-	claims["exp"] = time.Now().Add(time.Hour * 2).Unix()
+	claims["exp"] = time.Now().Add(time.Hour * 2).Unix() // 2 jam expired
 
-	token, err := jwtToken.GenerateToken(&claims)
-	if err != nil {
-		log.Println(err)
+	token, errGenerateToken := jwtToken.GenerateToken(&claims)
+	if errGenerateToken != nil {
+		log.Println(errGenerateToken)
 		fmt.Println("Unauthorize")
 		return
 	}
 
 	loginResponse := authdto.LoginResponse{
-		Name:  user.Name,
-		Email: user.Email,
-		Token: token,
+		Name:     user.Name,
+		Email:    user.Email,
+		Password: user.Password,
+		Token:    token,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	response := dto.SuccessResult{Code: http.StatusOK, Data: loginResponse}
 	json.NewEncoder(w).Encode(response)
+
 }

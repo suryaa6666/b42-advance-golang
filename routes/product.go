@@ -14,7 +14,7 @@ func ProductRoutes(r *mux.Router) {
 	h := handlers.HandlerProduct(productRepository)
 
 	r.HandleFunc("/products", middleware.Auth(h.FindProducts)).Methods("GET")
-	r.HandleFunc("/product/{id}", middleware.Auth(h.GetProduct)).Methods("GET")
-	// Create "/product" route using midleware Auth, handler CreateProduct, and method POST here ...
-	r.HandleFunc("/product", middleware.Auth(h.CreateProduct)).Methods("POST")
+	r.HandleFunc("/product/{id}", h.GetProduct).Methods("GET")
+	// Create "/product" route using middleware Auth, middleware UploadFile, handler CreateProduct, and method POST
+	r.HandleFunc("/product", middleware.Auth(middleware.UploadFile(h.CreateProduct))).Methods("POST")
 }
