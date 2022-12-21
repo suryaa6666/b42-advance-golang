@@ -1,5 +1,6 @@
 package handlers
 
+// Dont forget import required packages this below ...
 import (
 	productdto "dumbmerch/dto/product"
 	dto "dumbmerch/dto/result"
@@ -10,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 )
 
@@ -56,8 +58,13 @@ func (h *handlerProduct) GetProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// create product
 func (h *handlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+
+	// get data user token
+	userInfo := r.Context().Value("userLogin").(jwt.MapClaims)
+	userId := int(userInfo["id"].(float64))
 
 	request := new(productdto.ProductRequest)
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -82,10 +89,9 @@ func (h *handlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		Price:  request.Price,
 		Image:  request.Image,
 		Qty:    request.Qty,
-		UserID: request.UserID,
+		UserID: userId,
 	}
 
-	// err := mysql.DB.Create(&product).Error
 	product, err = h.ProductRepository.CreateProduct(product)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
