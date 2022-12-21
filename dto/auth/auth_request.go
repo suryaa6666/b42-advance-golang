@@ -1,7 +1,8 @@
 package authdto
 
 type AuthRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	ID       int    `json:"id"`
+	Name     string `gorm:"type: varchar(255)" json:"name"`
+	Email    string `gorm:"type: varchar(255)" json:"email"`
+	Password string `gorm:"type: varchar(255)" json:"password"`
 }
